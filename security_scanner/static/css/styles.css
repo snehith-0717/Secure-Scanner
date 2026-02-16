@@ -1,0 +1,583 @@
+/* ------------------------------------------------------------------
+   STYLES.CSS
+   Global Stylesheet for the Security Scanner application.
+   Controls how the website LOOKS (Colors, Layouts, Fonts).
+   ------------------------------------------------------------------ */
+
+/* =========================================
+   Global Resets & Tags
+   ========================================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    /* Body styles */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* =========================================
+   Navigation Bar Styles
+   ========================================= */
+.navbar {
+    /* Navigation bar styles */
+    background-color: #2c3e50;
+    /* Midnight Blue for sharp contrast */
+    color: white;
+    padding: 1rem 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Container for the navigation items */
+.nav-container {
+    /* Container for the navigation items */
+    max-width: 1200px;
+    margin: 0 auto;
+    /* Centers the container */
+    display: flex;
+    /* Enables Flexbox layout */
+    justify-content: space-between;
+    /* Pushes Logo to left, Menu to right */
+    align-items: center;
+    /* Vertically centers items */
+    padding: 0 2rem;
+}
+
+.logo {
+    /* Logo styles */
+    font-size: 1.8rem;
+    font-weight: bold;
+}
+
+.nav-menu {
+    /* Navigation menu styles */
+    display: flex;
+    list-style: none;
+    gap: 2rem;
+}
+
+.nav-menu a {
+    /* Navigation menu link styles */
+    color: #ecf0f1;
+    /* Light Gray/White for readability on dark bg */
+    text-decoration: none;
+    transition: color 0.3s;
+    font-weight: 600;
+}
+
+.nav-menu a:hover {
+    /* Navigation menu link hover styles */
+    color: #3498db;
+    /* Bright Blue on hover */
+}
+
+.container {
+    /* Container styles */
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 2rem;
+}
+
+/* Hero Section Styles */
+.hero {
+    /* Hero section styles */
+    background: linear-gradient(135deg, #1a5490, #0d2d5c);
+    /* Gradient background (Blue to Dark Blue) */
+    color: white;
+    padding: 6rem 2rem;
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.hero h1 {
+    /* Hero heading styles */
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.hero p {
+    /* Hero paragraph styles */
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+.btn-primary {
+    /* Primary button styles */
+    background-color: #0d8fdb;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+    /* Primary button hover styles */
+    background-color: #0a6db5;
+}
+
+.features {
+    /* Features styles */
+    margin: 3rem 0;
+}
+
+.features h2 {
+    /* Features heading styles */
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2rem;
+}
+
+/* Grid Layout for Features */
+.feature-grid {
+    /* Grid layout for features */
+    display: grid;
+    /* Enables Grid layout */
+    /* Auto-fit columns: Create as many columns as fit, but at least 250px wide */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    /* Check space between grid items */
+}
+
+.feature-card {
+    /* Feature card styles */
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.feature-card h3 {
+    /* Feature card heading styles */
+    color: #1a5490;
+    margin-bottom: 1rem;
+}
+
+.auth-container {
+    /* Authentication container styles */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 80px);
+    background-color: #f5f5f5;
+}
+
+/* Authentication Card (Login/Register Box) */
+.auth-card {
+    /* Authentication card styles */
+    background: linear-gradient(135deg, #ffffff 0%, #dbeafe 100%);
+    /* Stronger Blue Gradient */
+    border-top: 5px solid #1a5490;
+    /* Thicker accent */
+    padding: 2rem;
+    border-radius: 12px;
+    /* Softer corners */
+    border: 1px solid #bfdbfe;
+    /* Subtle border definition */
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    /* Deep Shadow */
+    width: 100%;
+    max-width: 400px;
+}
+
+.auth-card h2 {
+    /* Authentication card heading styles */
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #1a5490;
+}
+
+.form-group {
+    /* Form group styles */
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    /* Form group label styles */
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.form-group input {
+    /* Form group input styles */
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.form-group input:focus {
+    /* Form group input focus styles */
+    outline: none;
+    border-color: #0d8fdb;
+    box-shadow: 0 0 5px rgba(13, 143, 219, 0.2);
+}
+
+.form-group input:disabled {
+    /* Form group input disabled styles */
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+}
+
+.auth-card form {
+    /* Authentication card form styles */
+    margin-bottom: 1rem;
+}
+
+.auth-card p {
+    /* Authentication card paragraph styles */
+    text-align: center;
+    color: #666;
+}
+
+.auth-card a {
+    /* Authentication card link styles */
+    color: #0d8fdb;
+    text-decoration: none;
+}
+
+.auth-card a:hover {
+    /* Authentication card link hover styles */
+    text-decoration: underline;
+}
+
+.message {
+    /* Message styles */
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.message.success {
+    /* Message success styles */
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.message.error {
+    /* Message error styles */
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.dashboard-header {
+    /* Dashboard header styles */
+    margin-bottom: 2rem;
+}
+
+.dashboard-header h1 {
+    /* Dashboard header heading styles */
+    color: #1a5490;
+}
+
+.dashboard-section {
+    /* Dashboard section styles */
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-section h2 {
+    /* Dashboard section heading styles */
+    color: #1a5490;
+    margin-bottom: 1.5rem;
+}
+
+.profile-form {
+    /* Profile form styles */
+    max-width: 500px;
+}
+
+.scan-table {
+    /* Scan table styles */
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.scan-table th,
+.scan-table td {
+    /* Scan table header and cell styles */
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.scan-table th {
+    /* Scan table header styles */
+    background-color: #1a5490;
+    color: white;
+}
+
+.scan-table tr:hover {
+    /* Scan table row hover styles */
+    background-color: #f5f5f5;
+}
+
+.scan-table button {
+    /* Scan table button styles */
+    background-color: #0d8fdb;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.scan-table button:hover {
+    /* Scan table button hover styles */
+    background-color: #0a6db5;
+}
+
+.scanner-section {
+    /* Scanner section styles */
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.scanner-section h2 {
+    /* Scanner section heading styles */
+    color: #1a5490;
+    margin-bottom: 1.5rem;
+}
+
+.scan-form {
+    /* Scan form styles */
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.scan-form .form-group {
+    /* Scan form group styles */
+    flex: 1;
+    min-width: 250px;
+    margin-bottom: 0;
+}
+
+.scan-form button {
+    /* Scan form button styles */
+    align-self: flex-end;
+}
+
+.results {
+    /* Results styles */
+    background-color: #f9f9f9;
+    padding: 1.5rem;
+    border-radius: 5px;
+    border-left: 4px solid #0d8fdb;
+}
+
+.success-box {
+    /* Success box styles */
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+    padding: 1rem;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+}
+
+.error-box {
+    /* Error box styles */
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+    padding: 1rem;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+}
+
+.port-table {
+    /* Port table styles */
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.port-table th,
+/* Port table header styles */
+.port-table td {
+    /* Port table cell styles */
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.port-table th {
+    /* Port table header styles */
+    background-color: #1a5490;
+    color: white;
+}
+
+h3 {
+    /* Heading 3 styles */
+    color: #1a5490;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+h4 {
+    /* Heading 4 styles */
+    color: #0d8fdb;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+ul {
+    /* Unordered list styles */
+    margin-left: 2rem;
+}
+
+li {
+    /* List item styles */
+    margin-bottom: 0.5rem;
+}
+
+/* 
+   Responsive Design: Mobile Devices 
+   Triggered when screen width is 768px or less
+*/
+@media (max-width: 768px) {
+
+    /* Responsive design for mobile devices */
+    .nav-menu {
+        /* Navigation menu styles */
+        gap: 1rem;
+    }
+
+    .hero h1 {
+        /* Hero heading styles */
+        font-size: 2rem;
+        /* Smaller text on mobile */
+    }
+
+    .hero p {
+        /* Hero paragraph styles */
+        font-size: 1rem;
+    }
+
+    .feature-grid {
+        /* Feature grid styles */
+        grid-template-columns: 1fr;
+        /* Stack features in 1 column */
+    }
+
+}
+
+
+/* Modal Styles */
+.modal {
+    /* Modal styles */
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0, 0, 0);
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    /* Modal content styles */
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 0;
+    border: 1px solid #888;
+    width: 60%;
+    max-width: 800px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+
+    /* Fade in animation */
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.close-modal {
+    /* Close modal button styles */
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    margin: 10px 20px;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.close-modal:hover,
+/* Close modal button hover styles */
+.close-modal:focus {
+    /* Close modal button focus styles */
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+#modalTitle {
+    /* Modal title styles */
+    background-color: #1a5490;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 10px 10px 0 0;
+    margin: 0;
+}
+
+.modal-body {
+    /* Modal body styles */
+    padding: 20px;
+}
+
+.modal-body h3 {
+    /* Modal body heading styles */
+    color: #333;
+    margin-top: 0;
+}
+
+.modal-body ul {
+    /* Modal body unordered list styles */
+    list-style-type: none;
+    padding: 0;
+}
+
+.modal-body li {
+    /* Modal body list item styles */
+    background: #f9f9f9;
+    margin: 5px 0;
+    padding: 8px;
+    border-left: 3px solid #0d8fdb;
+    border-radius: 3px;
+}

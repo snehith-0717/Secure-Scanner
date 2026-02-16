@@ -1,0 +1,66 @@
+{% load static %}
+<!-- 
+    INDEX.HTML
+    The Landing Page / Home Page.
+    Explains what the app does and links to Login/Register.
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Scanner - Home</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">Security Scanner</div>
+            <!-- Navigation Links -->
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="/">Home</a></li>
+                <li><a href="/login/">Login</a></li>
+                <li><a href="/register/">Register</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section: The big welcome banner -->
+    <div class="hero">
+        <h1>Secure Web Application for HTTP Security Header and Network Port Analysis</h1>
+        <p>Advanced security assessment tool for analyzing HTTP headers and network ports. Identify vulnerabilities,
+            assess risks, and fortify your web infrastructure with actionable insights.</p>
+        <button class="btn-primary" onclick="window.location.href='/login/'">Get Started</button>
+    </div>
+
+    <div class="features">
+        <h2>Features</h2>
+        <!-- Feature Grid: Displays 4 key features in a 2x2 or 4x1 layout -->
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h3>Security Header Scanning</h3>
+                <p>Check if your website implements important HTTP security headers</p>
+            </div>
+            <div class="feature-card">
+                <h3>Port Scanning</h3>
+                <p>Identify open ports and running services on target servers</p>
+            </div>
+            <div class="feature-card">
+                <h3>Scan History</h3>
+                <p>View and manage your previous security scans</p>
+            </div>
+            <div class="feature-card">
+                <h3>Security Recommendations</h3>
+                <p>Get actionable recommendations to improve security posture</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/script.js' %}"></script>
+</body>
+
+</html>

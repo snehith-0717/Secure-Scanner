@@ -1,0 +1,297 @@
+{% load static %}
+<!-- 
+    DASHBOARD.HTML
+    The User Dashboard.
+    Shows the user's profile and their past scan history.
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Security Scanner</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">Security Scanner</div>
+            <ul class="nav-menu">
+                <li><a href="/dashboard/">Dashboard</a></li>
+                <li><a href="/scanner/">Scanner</a></li>
+                <li><a id="logoutBtn" href="#">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>Dashboard</h1>
+            <div id="userInfo"></div>
+        </div>
+
+        <!-- User Profile Section -->
+        <div class="dashboard-section">
+            <h2>Profile Information</h2>
+            <div class="profile-form">
+                <div class="form-group">
+                    <label>Username:</label>
+                    <input type="text" id="username" disabled>
+                </div>
+                <!-- ... other fields ... -->
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" id="email" disabled>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scan History Section: Dynamically populated by JS -->
+        <div class="dashboard-section">
+            <h2>Scan History</h2>
+            <div id="scanHistory" class="scan-history"></div>
+        </div>
+    </div>
+
+    <!-- Scan Details Modal -->
+    <div id="detailsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h2 id="modalTitle">Scan Details</h2>
+            <div id="modalBody" class="modal-body">
+                <!-- Content will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/script.js' %}"></script>
+    <script>
+        let globalScans = []; // Store scans globally so we can access them later (e.g. for the modal)
+
+        // ------------------------------------------------------------------
+        // ON PAGE LOAD
+        // ------------------------------------------------------------------
+        // When the HTML is fully loaded, runs these functions automatically.
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadUserProfile(); // 1. Fetch user name/email to display
+            await loadScanHistory(); // 2. Fetch previous scans to populate the table
+
+            // Attach "Click" listener to Logout button
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+
+            // ------------------------------------
+            // MODAL (POPUP) SETUP
+            // ------------------------------------
+            // Close the modal when clicking the 'X' button
+            document.querySelector('.close-modal').addEventListener('click', () => {
+                document.getElementById('detailsModal').style.display = 'none';
+            });
+
+            // Close the modal when clicking outside the box
+            window.onclick = function (event) {
+                if (event.target == document.getElementById('detailsModal')) {
+                    document.getElementById('detailsModal').style.display = 'none';
+                }
+            }
+        });
+
+        // ------------------------------------------------------------------
+        // LOAD USER PROFILE
+        // ------------------------------------------------------------------
+        // Fetches data from /scanner/api/profile/ (GET request)
+        async function loadUserProfile() {
+            try {
+                // 'await' waits for the server to reply before moving to the next line
+                const response = await fetch('/scanner/api/profile/', {
+                    method: 'GET',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken') // Django requires this for security
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json(); // Convert JSON response to JavaScript object
+
+                    // Update the HTML Input fields with data from the server
+                    document.getElementById('username').value = data.username;
+                    document.getElementById('email').value = data.email;
+
+                    // Update welcome message
+                    document.getElementById('userInfo').innerHTML = `<p>Welcome, <strong>${data.username}</strong></p>`;
+                } else {
+                    // If not logged in or error, redirect to login page
+                    window.location.href = '/login/';
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // LOAD SCAN HISTORY
+        // ------------------------------------------------------------------
+        async function loadScanHistory() {
+            try {
+                const response = await fetch('/scanner/api/scan-history/', {
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                });
+
+                if (response.ok) {
+                    const scans = await response.json();
+                    globalScans = scans; // Save the raw data to our global variable
+
+                    const historyDiv = document.getElementById('scanHistory');
+
+                    if (scans.length === 0) {
+                        historyDiv.innerHTML = '<p>No scans yet. Start scanning!</p>';
+                        return;
+                    }
+
+                    // Build the HTML Table string dynamically
+                    let html = '<table class="scan-table"><tr><th>Target</th><th>Type</th><th>Date</th><th>Action</th></tr>';
+
+                    // Loop through each scan in the list
+                    scans.forEach(scan => {
+                        const date = new Date(scan.created_at).toLocaleString();
+                        // Add a row to the table
+                        html += `<tr>
+                            <td>${scan.target}</td>
+                            <td>${scan.scan_type === 'header' ? 'Security Headers' : 'Port Scan'}</td>
+                            <td>${date}</td>
+                            <td>
+                                <!-- "View" button calls viewDetails() with the specific ID -->
+                                <button onclick="viewDetails(${scan.id})">View</button>
+                            </td>
+                        </tr>`;
+                    });
+                    html += '</table>';
+
+                    // Inject the generated HTML into the page
+                    historyDiv.innerHTML = html;
+                }
+            } catch (error) {
+                console.error('Error loading scan history:', error);
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // VIEW DETAILS (MODAL)
+        // ------------------------------------------------------------------
+        // Shows the detailed results in a popup when "View" is clicked
+        function viewDetails(scanId) {
+            // Find the specific scan object from our global list using its ID
+            const scan = globalScans.find(s => s.id === scanId);
+            if (!scan) return;
+
+            const modal = document.getElementById('detailsModal');
+            const modalBody = document.getElementById('modalBody');
+            const results = scan.results; // The JSON blob from the database
+
+            let html = `<h3>Target: ${scan.target}</h3>`;
+            html += `<p><strong>Type:</strong> ${scan.scan_type === 'header' ? 'Security Headers' : 'Port Scan'}</p>`;
+            html += `<p><strong>Date:</strong> ${new Date(scan.created_at).toLocaleString()}</p><hr>`;
+
+            // Render Header Scan Results
+            // Render Header Scan Results
+            if (scan.scan_type === 'header') {
+                if (results.headers_found && Object.keys(results.headers_found).length > 0) {
+                    html += '<h4>Headers Found:</h4><ul class="header-list">';
+                    for (const [key, value] of Object.entries(results.headers_found)) {
+                        // Check if it's the new format (object) or old (string)
+                        if (typeof value === 'object' && value !== null && value.value) {
+                            html += `<li>
+                                <strong>${key}:</strong> ${value.value}
+                                <div style="color: #000; font-size: 0.9em; margin-top: 2px;">${value.description}</div>
+                            </li>`;
+                        } else {
+                            html += `<li><strong>${key}:</strong> ${value}</li>`;
+                        }
+                    }
+                    html += '</ul>';
+                }
+
+                if (results.headers_missing && results.headers_missing.length > 0) {
+                    html += '<h4>Missing Headers:</h4><ul class="header-list">';
+                    results.headers_missing.forEach(h => {
+                        if (typeof h === 'object' && h !== null && h.header) {
+                            html += `<li>
+                                <strong>${h.header}</strong>
+                                <div style="color: #000; font-size: 0.9em; margin-top: 2px;">${h.description}</div>
+                            </li>`;
+                        } else {
+                            html += `<li>${h}</li>`;
+                        }
+                    });
+                    html += '</ul>';
+                }
+
+                if (results.recommendations && results.recommendations.length > 0) {
+                    html += '<h4>Recommendations:</h4><ul class="header-list">';
+                    results.recommendations.forEach(r => {
+                        if (typeof r === 'object' && r !== null && r.action) {
+                            html += `<li>
+                                <strong>${r.action}</strong>
+                                <div style="color: #000; font-size: 0.9em; margin-top: 2px;">${r.description}</div>
+                            </li>`;
+                        } else {
+                            html += `<li>${r}</li>`;
+                        }
+                    });
+                    html += '</ul>';
+                }
+
+                // Render Port Scan Results
+            } else if (scan.scan_type === 'port') {
+                if (results.open_ports && results.open_ports.length > 0) {
+                    html += '<h4>Open Ports:</h4><ul>';
+                    results.open_ports.forEach(p => {
+                        // Color code based on risk
+                        let riskClass = '';
+                        if (p.risk_level === 'Critical') riskClass = 'style="color: #dc3545; font-weight: bold;"';
+                        else if (p.risk_level === 'High') riskClass = 'style="color: #fd7e14; font-weight: bold;"';
+                        else if (p.risk_level === 'Medium') riskClass = 'style="color: #ffc107; font-weight: bold;"';
+                        else riskClass = 'style="color: #28a745; font-weight: bold;"';
+
+                        html += `<li>
+                            <strong>Port ${p.port} (${p.service})</strong> - <span ${riskClass}>[${p.risk_level}]</span><br>
+                            <em>${p.description}</em><br>
+                            <strong>Potential Attacks:</strong> ${p.attacks.join(', ')}<br>
+                            <strong>Recommendation:</strong> ${p.recommendation}
+                        </li>`;
+                    });
+                    html += '</ul>';
+                } else {
+                    html += '<p>No open ports found in common range.</p>';
+                }
+            }
+
+            modalBody.innerHTML = html;
+            modal.style.display = 'block'; // Make the modal visible
+        }
+
+
+        async function logout() {
+            try {
+                const response = await fetch('/scanner/api/logout/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                });
+
+                if (response.ok) {
+                    window.location.href = '/'; // Redirect to home on success
+                }
+            } catch (error) {
+                console.error('Error logging out:', error);
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,31 @@
+[Unit]
+# Description of the service
+Description=gunicorn daemon for security_scanner
+# Start this service only after the network is ready
+After=network.target
+
+[Service]
+# User that runs the process
+User=nicky
+
+# Group that runs the process
+# IMPORTANT: Set to 'www-data' so Nginx (which runs as www-data) 
+# has permission to access the socket file created by this service.
+Group=www-data
+
+# Project root directory
+WorkingDirectory=/home/nicky/security_scanner
+
+# Command to start Gunicorn
+# --access-logfile -   : Output access logs to stdout (systemd journal)
+# --workers 3          : Run 3 worker processes
+# --bind unix:...      : Create the socket file to talk to Nginx
+ExecStart=/home/nicky/security_scanner/venv/bin/gunicorn \
+          --access-logfile - \
+          --workers 3 \
+          --bind unix:/home/nicky/security_scanner/security_scanner.sock \
+          security_scanner.wsgi:application
+
+[Install]
+# Ensure this service starts when the system boots into multi-user mode
+WantedBy=multi-user.target

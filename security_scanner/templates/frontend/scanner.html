@@ -1,0 +1,263 @@
+{% load static %}
+<!-- 
+    SCANNER.HTML
+    The Main Feature Page.
+    Allows users to run Header Scans and Port Scans.
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scanner - Security Scanner</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">Security Scanner</div>
+            <ul class="nav-menu">
+                <li><a href="/dashboard/">Dashboard</a></li>
+                <li><a href="/scanner/">Scanner</a></li>
+                <li><a id="logoutBtn" href="#">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <!-- Section 1: Security Header Scanner -->
+        <div class="scanner-section">
+            <h2>Security Header Scan</h2>
+            <!-- Form: User inputs a URL to scan -->
+            <form id="headerScanForm" class="scan-form">
+                <div class="form-group">
+                    <label>Target URL:</label>
+                    <input type="text" id="headerTarget" placeholder="https://example.com" required>
+                </div>
+                <button type="submit" class="btn-primary">Scan Headers</button>
+            </form>
+            <!-- Results Container: Where the output will be displayed -->
+            <div id="headerResults" class="results"></div>
+        </div>
+
+        <!-- Section 2: Port Scanner -->
+        <div class="scanner-section">
+            <h2>Port Scan</h2>
+            <!-- Form: User inputs an IP or Domain -->
+            <form id="portScanForm" class="scan-form">
+                <div class="form-group">
+                    <label>Target IP or Domain:</label>
+                    <input type="text" id="portTarget" placeholder="example.com or 192.168.1.1" required>
+                </div>
+                <button type="submit" class="btn-primary">Scan Ports</button>
+            </form>
+            <!-- Results Container -->
+            <div id="portResults" class="results"></div>
+        </div>
+    </div>
+
+    <script src="{% static 'js/script.js' %}"></script>
+    <script>
+        // ------------------------------------------------------------------
+        // EVENT LISTENERS
+        // ------------------------------------------------------------------
+        // Wait for clicks on buttons or form submissions
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+
+        // Header Scan Form Submission
+        document.getElementById('headerScanForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); // Stop the form from reloading the page
+            const target = document.getElementById('headerTarget').value; // Get the URL typed by the user
+            await scanHeaders(target); // Run the scan function
+        });
+
+        // Port Scan Form Submission
+        document.getElementById('portScanForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); // Stop reload
+            const target = document.getElementById('portTarget').value; // Get IP/Domain
+            await scanPorts(target); // Run the port scan function
+        });
+
+        // ------------------------------------------------------------------
+        // HEADER SCAN LOGIC
+        // ------------------------------------------------------------------
+        async function scanHeaders(target) {
+            try {
+                // 1. Show loading state so user knows something is happening
+                document.getElementById('headerResults').innerHTML = '<p>Scanning...</p>';
+
+                // 2. Send POST request to our Python API (/scanner/api/scan-headers/)
+                const response = await fetch('/scanner/api/scan-headers/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken') // Security token
+                    },
+                    body: JSON.stringify({ target }) // Send the target URL as JSON data
+                });
+
+                const data = await response.json(); // Wait for server answer
+
+                // 3. Process the Result
+                if (response.ok) {
+                    const results = data.results;
+
+                    // Build HTML to display results
+                    let html = '<h3>Results for: ' + target + '</h3>';
+                    // Add "Print Report" button
+                    html += '<button onclick="window.print()" class="btn-primary" style="margin-bottom: 20px;">Save as PDF / Print</button>';
+
+                    if (results.status === 'success') {
+                        html += '<div class="success-box">' + results.message + '</div>';
+
+                        // List Found Headers
+                        if (Object.keys(results.headers_found).length > 0) {
+                            html += '<h4>Security Headers Found:</h4><ul class="header-list">';
+                            for (let header in results.headers_found) {
+                                const details = results.headers_found[header];
+                                html += `<li>
+                                    <strong>${header}:</strong> ${details.value}
+                                    <div style="color: #000; font-size: 0.9em; margin-top: 2px;">${details.description}</div>
+                                </li>`;
+                            }
+                            html += '</ul>';
+                        }
+
+                        // List Missing Headers
+                        if (results.headers_missing.length > 0) {
+                            html += '<h4>Missing Headers:</h4><ul class="header-list">';
+                            results.headers_missing.forEach(item => {
+                                html += `<li>
+                                    <strong>${item.header}</strong>
+                                    <div style="color: #000; font-size: 0.9em; margin-top: 2px;">${item.description}</div>
+                                </li>`;
+                            });
+                            html += '</ul>';
+                        }
+
+                        // List Recommendations
+                        if (results.recommendations.length > 0) {
+                            html += '<h4>Recommendations:</h4><ul class="header-list">';
+                            results.recommendations.forEach(rec => {
+                                // Handle both new objects and old strings
+                                if (typeof rec === 'object' && rec !== null && rec.action) {
+                                    html += `<li>
+                                        <strong>${rec.action}</strong>
+                                        <div style="color: #000; font-size: 0.9em; margin-top: 2px;">${rec.description}</div>
+                                    </li>`;
+                                } else {
+                                    // Fallback for old string format
+                                    html += `<li>${rec}</li>`;
+                                }
+                            });
+                            html += '</ul>';
+                        }
+                    } else {
+                        html += '<div class="error-box">Error: ' + results.message + '</div>';
+                    }
+
+                    // Display the generated HTML
+                    document.getElementById('headerResults').innerHTML = html;
+                } else {
+                    document.getElementById('headerResults').innerHTML = '<div class="error-box">Error: ' + data.error + '</div>';
+                }
+            } catch (error) {
+                document.getElementById('headerResults').innerHTML = '<div class="error-box">Error: ' + error.message + '</div>';
+            }
+        }
+
+        // ------------------------------------------------------------------
+        // PORT SCAN LOGIC
+        // ------------------------------------------------------------------
+        async function scanPorts(target) {
+            try {
+                // Show loading state
+                document.getElementById('portResults').innerHTML = '<p>Scanning...</p>';
+
+                // API call to scan-ports endpoint
+                const response = await fetch('/scanner/api/scan-ports/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ target })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    const results = data.results;
+                    let html = '<h3>Results for: ' + target + '</h3>';
+                    html += '<button onclick="window.print()" class="btn-primary" style="margin-bottom: 20px;">Save as PDF / Print</button>';
+
+                    if (results.status === 'success') {
+                        html += '<div class="success-box">' + results.message + '</div>';
+
+                        // Show Open Ports Table
+                        if (results.open_ports.length > 0) {
+                            html += '<h4>Open Ports:</h4><table class="port-table"><tr><th>Port</th><th>Service</th><th>Status</th><th>Risk Level</th></tr>';
+                            results.open_ports.forEach(port => {
+                                // Determine color based on risk level (keeping this if needed for other UI elements, but text is now black)
+                                let riskClass = '';
+                                if (port.risk_level === 'Critical') riskClass = 'style="color: #dc3545; font-weight: bold;"';
+                                else if (port.risk_level === 'High') riskClass = 'style="color: #fd7e14; font-weight: bold;"';
+                                else if (port.risk_level === 'Medium') riskClass = 'style="color: #ffc107; font-weight: bold;"';
+                                else riskClass = 'style="color: #28a745; font-weight: bold;"';
+
+                                html += '<tr>';
+                                html += '<td>' + port.port + '</td>';
+                                html += '<td>' + port.service + '</td>';
+                                html += '<td>OPEN</td>';
+                                html += '<td style="color: black;">' + port.risk_level + '</td>';
+                                html += '</tr>';
+                                // Description Row
+                                html += '<tr><td colspan="4" style="background-color: #f8f9fa; padding: 10px;">';
+                                html += '<strong>Description:</strong> ' + port.description + '<br>';
+                                html += '<strong>Potential Attacks:</strong> ' + port.attacks.join(', ') + '<br>';
+                                html += '<strong>Recommendation:</strong> ' + port.recommendation;
+                                html += '</td></tr>';
+                            });
+                            html += '</table>';
+                        }
+
+                        if (results.closed_ports.length > 0) {
+                            html += '<h4>Closed Ports Checked: ' + results.closed_ports.length + '</h4>';
+                        }
+                    } else {
+                        html += '<div class="error-box">Error: ' + results.message + '</div>';
+                    }
+
+                    document.getElementById('portResults').innerHTML = html;
+                } else {
+                    document.getElementById('portResults').innerHTML = '<div class="error-box">Error: ' + data.error + '</div>';
+                }
+            } catch (error) {
+                document.getElementById('portResults').innerHTML = '<div class="error-box">Error: ' + error.message + '</div>';
+            }
+        }
+
+        async function logout() {
+            try {
+                const response = await fetch('/scanner/api/logout/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                });
+
+                if (response.ok) {
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                console.error('Error logging out:', error);
+            }
+        }
+    </script>
+</body>
+
+</html>
